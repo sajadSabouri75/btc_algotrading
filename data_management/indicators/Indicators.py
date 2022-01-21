@@ -43,7 +43,7 @@ class Indicators:
         obv[self.df.close == self.df.close.shift()] = 0
         self.df['obv'] = obv.cumsum()
 
-    def rsi(self, period, name = 'rsi'):
+    def rsi(self, period, name='rsi'):
         diff = self.df.close.diff().values
         gains = diff
         losses = -diff
@@ -83,7 +83,8 @@ class Indicators:
         # Senkou Span A (Leading Span A): (Conversion Line + Base Line)/2))
         self.df['senkou_span_a'] = ((self.df['tenkan_sen'] + self.df['kijun_sen']) / 2).shift(26)
         # Senkou Span B (Leading Span B): (52-period high + 52-period low)/2))
-        self.df['senkou_span_b'] = ((self.df['high'].rolling(window=52).max() + self.df['low'].rolling(window=52).min()) / 2).shift(26)
+        self.df['senkou_span_b'] = (
+                    (self.df['high'].rolling(window=52).max() + self.df['low'].rolling(window=52).min()) / 2).shift(26)
         # The most current closing price plotted 22 time periods behind (optional)
         self.df['chikou_span'] = self.df['close'].shift(-22)  # 22 according to investopedia
 
@@ -230,3 +231,17 @@ class Indicators:
         self.df['momentum'] = self.SMA(momentum, 5)
         return self.df['momentum']
 
+    def williams_fractal(self, period=5):
+        periods = range(-period, period + 1)
+        high_fractals_times = pd.Series(np.logical_and.reduce(
+            [
+                self.df.high >= self.df.high.shift(period) for period in periods
+            ]), index=self.df.index
+        )
+        low_fractals_times = pd.Series(np.logical_and.reduce(
+            [
+                self.df.low <= self.df.low.shift(period) for period in periods
+            ]), index=self.df.index
+        )
+        self.df['low_fractals'], self.df['high_fractals'] = low_fractals_times, high_fractals_times
+        return low_fractals_times, high_fractals_times

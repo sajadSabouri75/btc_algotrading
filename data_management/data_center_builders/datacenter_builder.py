@@ -13,6 +13,9 @@ class DataCenterBuilder:
         self._targetIndicators = kwargs['targetIndicators'] if 'targetIndicators' in kwargs else None
         self._outputDirectory = kwargs['outputDirectory'] if 'outputDirectory' in kwargs else ''
 
+    def setDataCenter(self, dataSource):
+        self._dataSource = dataSource
+
     def buildDataCenter(self, outputName):
         dataSource = self._dataSource
 
@@ -25,15 +28,17 @@ class DataCenterBuilder:
 
         self._dataSource = dataSource
 
-        self.addIndicatorsToDataSource(outputName)
+        self.addIndicatorsToDataSource()
 
         self._dataCenter = datacenter.DataCenter(
             dataSource=self._dataSource,
         )
 
+        self.saveDataCenter(outputName)
+
         return self._dataCenter
 
-    def addIndicatorsToDataSource(self, outputName):
+    def addIndicatorsToDataSource(self):
         indicatorGenerator = Indicators.Indicators(self._dataSource)
 
         if 'rsi' in self._targetIndicators:
@@ -41,11 +46,11 @@ class DataCenterBuilder:
         if 'adx' in self._targetIndicators:
             indicatorGenerator.adx(14)
         if 'cci' in self._targetIndicators:
-            indicatorGenerator.cci(20)
+            indicatorGenerator.cci(5)
         if 'mfi' in self._targetIndicators:
             indicatorGenerator.mfi(14)
         if 'dt' in self._targetIndicators:
-            indicatorGenerator.dt_oscillator(3, 8, 13)
+            indicatorGenerator.dt_oscillator(2, 2, 5)
         if 'macd' in self._targetIndicators:
             indicatorGenerator.macd()
         if 'sma' in self._targetIndicators:
@@ -76,7 +81,10 @@ class DataCenterBuilder:
             indicatorGenerator.momentum(10)
         if 'rsi_2' in self._targetIndicators:
             indicatorGenerator.rsi(2, 'rsi_2')
+        if 'williams_fractal' in self._targetIndicators:
+            indicatorGenerator.williams_fractal()
 
+    def saveDataCenter(self, outputName):
         if not os.path.exists(self._outputDirectory):
             os.makedirs(self._outputDirectory)
         self._dataSource.to_csv(self._outputDirectory + outputName + '.csv')
