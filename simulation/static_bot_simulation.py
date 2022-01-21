@@ -15,7 +15,7 @@ class StaticBotSimulator:
         self._low_fractals_times = \
             np.array(
                 [i for i in range(self._n_candles) if self._target_datacenter.getSeriesOf('low_fractals')[i]])
-        self._n_true_divergences = 2
+        self._n_true_divergences = 1
 
     def simulate(self):
         all_indicators = ['high', 'low', 'cci', 'rsi', 'obv']
@@ -35,11 +35,10 @@ class StaticBotSimulator:
     def check_sell_signal(self, current_index, series, target_indicators):
         accessible_high_fractals = self.get_last_accessible_fractals(self._high_fractals_indices,
                                                                      self._low_fractals_times, current_index)
-        if len(accessible_high_fractals) == 3:
-            if series['high'].iloc[current_index] < series['high'].iloc[accessible_high_fractals[2]]:
+        if len(accessible_high_fractals) == 2:
+            if series['high'].iloc[current_index] < series['high'].iloc[accessible_high_fractals[1]]:
                 values_for_divergence_check = series.iloc[accessible_high_fractals]
-                if values_for_divergence_check['high'].iloc[2] < values_for_divergence_check['high'].iloc[1] > \
-                        values_for_divergence_check['high'].iloc[0]:
+                if values_for_divergence_check['high'].iloc[1] > values_for_divergence_check['high'].iloc[0]:
                     diff_high = values_for_divergence_check['high'].iloc[1] - values_for_divergence_check['high'].iloc[0]
                     diffs = [values_for_divergence_check[target_indicator].iloc[1] -
                              values_for_divergence_check[target_indicator].iloc[0] for target_indicator in
@@ -56,11 +55,10 @@ class StaticBotSimulator:
     def check_buy_signal(self, current_index, series, target_indicators):
         accessible_low_fractals = self.get_last_accessible_fractals(self._low_fractals_times,
                                                                     self._high_fractals_indices, current_index)
-        if len(accessible_low_fractals) == 3:
-            if series['low'].iloc[current_index] > series['low'].iloc[accessible_low_fractals[2]]:
+        if len(accessible_low_fractals) == 2:
+            if series['low'].iloc[current_index] > series['low'].iloc[accessible_low_fractals[1]]:
                 values_for_divergence_check = series.iloc[accessible_low_fractals]
-                if values_for_divergence_check['low'].iloc[2] > values_for_divergence_check['low'].iloc[1] < \
-                        values_for_divergence_check['low'].iloc[0]:
+                if values_for_divergence_check['low'].iloc[1] < values_for_divergence_check['low'].iloc[0]:
                     diff_low = values_for_divergence_check['low'].iloc[1] - values_for_divergence_check['low'].iloc[0]
                     diffs = [values_for_divergence_check[target_indicator].iloc[1] -
                              values_for_divergence_check[target_indicator].iloc[0] for target_indicator in
@@ -75,11 +73,11 @@ class StaticBotSimulator:
         return False
 
     def get_last_accessible_fractals(self, fractals, counterpart_fractals, current_index):
-        selected_fractals = fractals[fractals < current_index - self._fractal_period][-3:]
+        selected_fractals = fractals[fractals < current_index - self._fractal_period][-2:]
         counterpart_selected_fractals = counterpart_fractals[
                                             counterpart_fractals < current_index - self._fractal_period][-1:]
         if selected_fractals is not None:
-            if len(selected_fractals) == 3:
+            if len(selected_fractals) == 2:
                 if selected_fractals[1] > counterpart_selected_fractals:
                     return selected_fractals
         return []

@@ -45,11 +45,11 @@ class DataCenterBuilder:
         indicatorGenerator = Indicators.Indicators(self._dataSource)
 
         if 'rsi' in self._targetIndicators:
-            indicatorGenerator.rsi(7)
+            indicatorGenerator.rsi(2)
         if 'adx' in self._targetIndicators:
             indicatorGenerator.adx(14)
         if 'cci' in self._targetIndicators:
-            indicatorGenerator.cci(7)
+            indicatorGenerator.cci(2)
         if 'mfi' in self._targetIndicators:
             indicatorGenerator.mfi(14)
         if 'dt' in self._targetIndicators:

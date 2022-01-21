@@ -13,7 +13,7 @@ import matplotlib.colors as mcolors
 def main():
     # > helpful directories
     inputs_relative_addresses, outputs_partial_relative_address = \
-        generate_helpful_directories('datasources', '/', ['btc_5m', 'btc_5m'], 'csv')
+        generate_helpful_directories('datasources', '/', ['btc_30m', 'btc_5m'], 'csv')
 
     # > data import and build
     # dependent series to work with
@@ -37,7 +37,7 @@ def main():
     simulator = simulator_lib.StaticBotSimulator(
         target_datacenter=datacenters[0],
         dependent_datacenters=datacenters[1:],
-        fractal_period=5
+        fractal_period=2
     )
     datasource = simulator.simulate()
     datacenter_builder.setDatasource(datasource)
