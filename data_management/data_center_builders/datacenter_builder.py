@@ -12,6 +12,8 @@ class DataCenterBuilder:
         self._maxDataBound = kwargs['maxDataBound'] if 'maxDataBound' in kwargs else 0
         self._targetIndicators = kwargs['targetIndicators'] if 'targetIndicators' in kwargs else None
         self._outputDirectory = kwargs['outputDirectory'] if 'outputDirectory' in kwargs else ''
+        self._fractal_period = kwargs['fractal_period'] if 'fractal_period' in kwargs else 5
+        self._secondary_fractal_period = kwargs['secondary_fractals_period'] if 'secondary_fractals_period' in kwargs else 2
 
     def setDatasource(self, dataSource):
         self._dataSource = dataSource
@@ -45,15 +47,15 @@ class DataCenterBuilder:
         indicatorGenerator = Indicators.Indicators(self._dataSource)
 
         if 'rsi' in self._targetIndicators:
-            indicatorGenerator.rsi(2)
+            indicatorGenerator.rsi(self._fractal_period)
         if 'adx' in self._targetIndicators:
             indicatorGenerator.adx(14)
         if 'cci' in self._targetIndicators:
-            indicatorGenerator.cci(2)
+            indicatorGenerator.cci(self._fractal_period)
         if 'mfi' in self._targetIndicators:
-            indicatorGenerator.mfi(14)
+            indicatorGenerator.mfi(self._fractal_period)
         if 'dt' in self._targetIndicators:
-            indicatorGenerator.dt_oscillator(2, 2, 5)
+            indicatorGenerator.dt_oscillator(2, 2, self._fractal_period)
         if 'macd' in self._targetIndicators:
             indicatorGenerator.macd()
         if 'sma' in self._targetIndicators:
@@ -82,12 +84,16 @@ class DataCenterBuilder:
             indicatorGenerator.emaCollection([10, 21, 50])
         if 'momentum_10' in self._targetIndicators:
             indicatorGenerator.momentum(10)
+        if 'momentum' in self._targetIndicators:
+            indicatorGenerator.momentum(self._fractal_period)
         if 'rsi_2' in self._targetIndicators:
             indicatorGenerator.rsi(2, 'rsi_2')
         if 'williams_fractal' in self._targetIndicators:
-            indicatorGenerator.williams_fractal()
+            indicatorGenerator.williams_fractal(self._fractal_period)
         if 'obv' in self._targetIndicators:
             indicatorGenerator.on_balance_volume()
+        if 'fractals_secondary' in self._targetIndicators:
+            indicatorGenerator.williams_fractal(self._secondary_fractal_period, True)
 
     def saveDataCenter(self, outputName):
         if not os.path.exists(self._outputDirectory):

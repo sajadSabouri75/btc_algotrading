@@ -13,7 +13,7 @@ import matplotlib.colors as mcolors
 def main():
     # > helpful directories
     inputs_relative_addresses, outputs_partial_relative_address = \
-        generate_helpful_directories('datasources', '/', ['btc_30m', 'btc_5m'], 'csv')
+        generate_helpful_directories('datasources', '/', ['btc_5m', 'btc_5m'], 'csv')
 
     # > data import and build
     # dependent series to work with
@@ -22,14 +22,18 @@ def main():
     # define a data center builder to manage import and generation of series
     target_series_columns = ['time', 'close', 'high', 'low', 'open', 'volume', 'amount', 'index']
     target_series_min_index = 0
-    target_series_max_index = math.inf
+    target_series_max_index = 50000
+    fractals = 6
+    fractals_secondary = 2
     datacenter_builder = data_builder.CSVDataCenterBuilder(
         fileName=inputs_relative_addresses,
         minDataBound=target_series_min_index,
         maxDataBound=target_series_max_index,
         targetColumns=target_series_columns,
         targetIndicators=dependent_series_names,
-        outputDirectory=outputs_partial_relative_address
+        outputDirectory=outputs_partial_relative_address,
+        fractal_period=fractals,
+        secondary_fractals_period=fractals_secondary
     )
     datacenters = datacenter_builder.buildDataCenter()
 
@@ -37,7 +41,8 @@ def main():
     simulator = simulator_lib.StaticBotSimulator(
         target_datacenter=datacenters[0],
         dependent_datacenters=datacenters[1:],
-        fractal_period=2
+        fractal_period=fractals,
+        secondary_fractal_period=fractals_secondary
     )
     datasource = simulator.simulate()
     datacenter_builder.setDatasource(datasource)
@@ -107,7 +112,10 @@ def get_dependent_series_names():
         'macd',
         'williams_fractal',
         'dt',
-        'obv'
+        'obv',
+        'mfi',
+        'momentum',
+        'fractals_secondary'
     ]
     return dependent_series_names
 

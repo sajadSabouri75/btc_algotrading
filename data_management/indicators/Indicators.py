@@ -231,7 +231,7 @@ class Indicators:
         self.df['momentum'] = self.SMA(momentum, 5)
         return self.df['momentum']
 
-    def williams_fractal(self, period=5):
+    def williams_fractal(self, period=5, isSecondary=False):
         periods = range(-period, period + 1)
         high_fractals_times = pd.Series(np.logical_and.reduce(
             [
@@ -243,11 +243,10 @@ class Indicators:
                 self.df.low <= self.df.low.shift(period) for period in periods
             ]), index=self.df.index
         )
-        self.df['low_fractals'], self.df['high_fractals'] = low_fractals_times, high_fractals_times
-        # x = range(self.df)
-        # plt.plot(x, self.df.close)
-        # plt.scatter(np.array()self.df['low_fractals'])
-        # plt.plot(self.df['high_fractals'])
-        # plt.draw()
-        # plt.show()
+
+        if isSecondary:
+            self.df['secondary_low_fractals'], self.df['secondary_high_fractals'] = low_fractals_times, high_fractals_times
+        else:
+            self.df['low_fractals'], self.df['high_fractals'] = low_fractals_times, high_fractals_times
+
         return low_fractals_times, high_fractals_times
