@@ -102,7 +102,7 @@ class IntelligentTrader:
                     timeIndex=self._timeIndex,
                     cryptoName='BTC-USD',
                     amount=investmentPerTrade / currentValue,
-                    leverage=5,
+                    leverage=1,
                     stopLossValue=stoplossValue)
 
                 self._buyWeakSignalAchievedCounts = 0
@@ -149,7 +149,7 @@ class IntelligentTrader:
                     timeIndex=self._timeIndex,
                     cryptoName='BTC-USD',
                     amount=investmentPerTrade / currentValue,
-                    leverage=5,
+                    leverage=1,
                     stopLossValue=stoplossValue)
 
                 self._buyWeakSignalAchievedCounts = 0

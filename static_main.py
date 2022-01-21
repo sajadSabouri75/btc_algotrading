@@ -1,3 +1,4 @@
+import math
 import time
 from data_management.data_center_builders import csv_datacenter_builder as data_builder
 from trading.traders import CommandTrader as td
@@ -12,7 +13,7 @@ import matplotlib.colors as mcolors
 def main():
     # > helpful directories
     inputs_relative_addresses, outputs_partial_relative_address = \
-        generate_helpful_directories('datasources', '/', ['doge_5m', 'btc_5m'], 'csv')
+        generate_helpful_directories('datasources', '/', ['btc_5m', 'btc_5m'], 'csv')
 
     # > data import and build
     # dependent series to work with
@@ -21,7 +22,7 @@ def main():
     # define a data center builder to manage import and generation of series
     target_series_columns = ['time', 'close', 'high', 'low', 'open', 'volume', 'amount', 'index']
     target_series_min_index = 0
-    target_series_max_index = 100000
+    target_series_max_index = math.inf
     datacenter_builder = data_builder.CSVDataCenterBuilder(
         fileName=inputs_relative_addresses,
         minDataBound=target_series_min_index,
@@ -36,7 +37,7 @@ def main():
     simulator = simulator_lib.StaticBotSimulator(
         target_datacenter=datacenters[0],
         dependent_datacenters=datacenters[1:],
-        fractal_period=7
+        fractal_period=5
     )
     datasource = simulator.simulate()
     datacenter_builder.setDatasource(datasource)
@@ -105,7 +106,8 @@ def get_dependent_series_names():
         'cci',
         'macd',
         'williams_fractal',
-        'dt'
+        'dt',
+        'obv'
     ]
     return dependent_series_names
 
@@ -186,7 +188,6 @@ def updateTradingPlot(xPoints, yPoints, figureIndex, subPlotPosition, title='unk
                             edgecolors='none', marker='^')
     plt.draw()
     plt.pause(0.5)
-
 
 
 if __name__ == '__main__':

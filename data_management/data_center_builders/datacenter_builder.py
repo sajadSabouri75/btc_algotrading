@@ -45,7 +45,7 @@ class DataCenterBuilder:
         indicatorGenerator = Indicators.Indicators(self._dataSource)
 
         if 'rsi' in self._targetIndicators:
-            indicatorGenerator.rsi(14)
+            indicatorGenerator.rsi(7)
         if 'adx' in self._targetIndicators:
             indicatorGenerator.adx(14)
         if 'cci' in self._targetIndicators:
@@ -86,6 +86,8 @@ class DataCenterBuilder:
             indicatorGenerator.rsi(2, 'rsi_2')
         if 'williams_fractal' in self._targetIndicators:
             indicatorGenerator.williams_fractal()
+        if 'obv' in self._targetIndicators:
+            indicatorGenerator.on_balance_volume()
 
     def saveDataCenter(self, outputName):
         if not os.path.exists(self._outputDirectory):
