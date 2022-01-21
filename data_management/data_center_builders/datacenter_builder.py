@@ -13,8 +13,11 @@ class DataCenterBuilder:
         self._targetIndicators = kwargs['targetIndicators'] if 'targetIndicators' in kwargs else None
         self._outputDirectory = kwargs['outputDirectory'] if 'outputDirectory' in kwargs else ''
 
-    def setDataCenter(self, dataSource):
+    def setDatasource(self, dataSource):
         self._dataSource = dataSource
+
+    def getDataSource(self):
+        return self._dataSource
 
     def buildDataCenter(self, outputName):
         dataSource = self._dataSource
@@ -46,7 +49,7 @@ class DataCenterBuilder:
         if 'adx' in self._targetIndicators:
             indicatorGenerator.adx(14)
         if 'cci' in self._targetIndicators:
-            indicatorGenerator.cci(5)
+            indicatorGenerator.cci(7)
         if 'mfi' in self._targetIndicators:
             indicatorGenerator.mfi(14)
         if 'dt' in self._targetIndicators:

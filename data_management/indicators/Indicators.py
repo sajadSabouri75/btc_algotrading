@@ -2,7 +2,7 @@ import math
 import numpy as np
 from finta import TA
 import pandas as pd
-
+from matplotlib import pyplot as plt
 
 class Indicators:
     def __init__(self, df):
@@ -244,4 +244,10 @@ class Indicators:
             ]), index=self.df.index
         )
         self.df['low_fractals'], self.df['high_fractals'] = low_fractals_times, high_fractals_times
+        # x = range(self.df)
+        # plt.plot(x, self.df.close)
+        # plt.scatter(np.array()self.df['low_fractals'])
+        # plt.plot(self.df['high_fractals'])
+        # plt.draw()
+        # plt.show()
         return low_fractals_times, high_fractals_times

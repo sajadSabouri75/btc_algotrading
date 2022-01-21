@@ -17,41 +17,51 @@ class StaticBotSimulator:
                 [i for i in range(self._n_candles) if self._target_datacenter.getSeriesOf('low_fractals')[i] == True])
 
     def simulate(self):
-        series = self._target_datacenter.getSeriesOf(['high', 'low', 'macdh'])
+        target_indicator = 'cci'
+        series = self._target_datacenter.getSeriesOf(['high', 'low', target_indicator])
         self._target_datacenter.getDatasource()['buy signals'] = False
         self._target_datacenter.getDatasource()['sell signals'] = False
 
         for current_index in range(self._n_candles):
-            self._target_datacenter.getDatasource().loc[current_index, 'sell signals'] = self.check_sell_signal(current_index, series)
-            self._target_datacenter.getDatasource().loc[current_index, 'buy signals'] = self.check_buy_signal(current_index, series)
+            self._target_datacenter.getDatasource().loc[current_index, 'sell signals'] = \
+                self.check_sell_signal(current_index, series, target_indicator)
+            self._target_datacenter.getDatasource().loc[current_index, 'buy signals'] = \
+                self.check_buy_signal(current_index, series, target_indicator)
 
         return self._target_datacenter.getDatasource()
 
-    def check_sell_signal(self, current_index, series):
-        accessible_high_fractals = self.get_last_accessible_fractals(self._high_fractals_indices, current_index)
-        if len(accessible_high_fractals) == 2:
+    def check_sell_signal(self, current_index, series, target_indicator):
+        accessible_high_fractals = self.get_last_accessible_fractals(self._high_fractals_indices, self._low_fractals_times, current_index)
+        if len(accessible_high_fractals) == 3:
             values_for_divergence_check = series.iloc[accessible_high_fractals]
-
-            diff_high = values_for_divergence_check['high'].iloc[1] - values_for_divergence_check['high'].iloc[0]
-            diff_rsi = values_for_divergence_check['macdh'].iloc[1] - values_for_divergence_check['macdh'].iloc[0]
-            if diff_high * diff_rsi < 0:
-                if diff_high > 0:
-                    return True
+            if values_for_divergence_check['high'].iloc[2] < values_for_divergence_check['high'].iloc[1] > values_for_divergence_check['high'].iloc[0]:
+                diff_high = values_for_divergence_check['high'].iloc[1] - values_for_divergence_check['high'].iloc[0]
+                diff_rsi = values_for_divergence_check[target_indicator].iloc[1] - values_for_divergence_check[target_indicator].iloc[0]
+                if diff_high * diff_rsi < 0:
+                    if diff_high > 0:
+                        return True
 
         return False
 
-    def check_buy_signal(self, current_index, series):
-        accessible_low_fractals = self.get_last_accessible_fractals(self._low_fractals_times, current_index)
-        if len(accessible_low_fractals) == 2:
+    def check_buy_signal(self, current_index, series, target_indicator):
+        accessible_low_fractals = self.get_last_accessible_fractals(self._low_fractals_times, self._high_fractals_indices, current_index)
+        if len(accessible_low_fractals) == 3:
             values_for_divergence_check = series.iloc[accessible_low_fractals]
-
-            diff_low = values_for_divergence_check['low'].iloc[1] - values_for_divergence_check['low'].iloc[0]
-            diff_rsi = values_for_divergence_check['macdh'].iloc[1] - values_for_divergence_check['macdh'].iloc[0]
-            if diff_low * diff_rsi < 0:
-                if diff_low < 0:
-                    return True
+            if values_for_divergence_check['low'].iloc[2] > values_for_divergence_check['low'].iloc[1] < values_for_divergence_check['low'].iloc[0]:
+                diff_low = values_for_divergence_check['low'].iloc[1] - values_for_divergence_check['low'].iloc[0]
+                diff_rsi = values_for_divergence_check[target_indicator].iloc[1] - values_for_divergence_check[target_indicator].iloc[0]
+                if diff_low * diff_rsi < 0:
+                    if diff_low < 0:
+                        return True
 
         return False
 
-    def get_last_accessible_fractals(self, fractals, current_index):
-        return fractals[fractals < current_index - self._fractal_period][-2:]
+    def get_last_accessible_fractals(self, fractals, counterpart_fractals, current_index):
+        selected_fractals = fractals[fractals < current_index - self._fractal_period][-3:]
+        counterpart_selected_fractals = counterpart_fractals[counterpart_fractals < current_index - self._fractal_period][-1:]
+        if selected_fractals is not None:
+            if len(selected_fractals)==3:
+                if selected_fractals[2] > counterpart_selected_fractals:
+                    return selected_fractals
+        return []
+
