@@ -126,10 +126,15 @@ class StaticBotSimulator:
         return False
 
     def get_last_accessible_fractals(self, fractals, secondary_fractals, counterpart_fractals, current_index):
+        if self._fractal_period == self._secondary_fractal_period:
+            selected_fractals_indices = 3
+        else:
+            selected_fractals_indices = 2
+
         selected_fractals = \
             fractals[
                 fractals < current_index - self._fractal_period
-                ][-2:]
+                ][-selected_fractals_indices:]
 
         counterpart_selected_fractals = \
             counterpart_fractals[
@@ -141,11 +146,14 @@ class StaticBotSimulator:
                 secondary_fractals < current_index - self._secondary_fractal_period
                 ][-1:]
 
-        if len(selected_fractals) == 2 and\
-                len(selected_secondary_fractals) == 1 and\
+        if ((len(selected_fractals) == 2 and selected_secondary_fractals == 2) or (len(selected_fractals) == 3)) and \
+                len(selected_secondary_fractals) == 1 and \
                 len(counterpart_selected_fractals) == 1:
-            if selected_secondary_fractals[0] > selected_fractals[1]:
+            if selected_secondary_fractals[0] > selected_fractals[1] or selected_fractals_indices == 3:
                 if selected_fractals[1] > counterpart_selected_fractals[0]:
-                    selected_fractals = np.append(selected_fractals, selected_secondary_fractals[0])
-                    return selected_fractals
+                    if selected_fractals_indices == 3:
+                        return selected_fractals
+                    else:
+                        selected_fractals = np.append(selected_fractals, selected_secondary_fractals[0])
+                        return selected_fractals
         return []
