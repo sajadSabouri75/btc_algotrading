@@ -23,8 +23,8 @@ def main():
     target_series_columns = ['time', 'close', 'high', 'low', 'open', 'volume', 'amount', 'index']
     target_series_min_index = 0
     target_series_max_index = 50000
-    fractals = 2
-    fractals_secondary = 2
+    fractals = 5
+    fractals_secondary = 5
     datacenter_builder = data_builder.CSVDataCenterBuilder(
         fileName=inputs_relative_addresses,
         minDataBound=target_series_min_index,
@@ -67,7 +67,7 @@ def main():
 
     # define an investor -> the investor knows the naive trader it is working with
     investor = inv.Investor(
-        capital=100000, investmentPerTrade=1000, trader=intelligentTrader,
+        capital=1000, investmentPerTrade=1000, trader=intelligentTrader,
         trainingMinNumberOfTrades=30, testMinNumberOfTrades=5,
         trainingMaxNumberOfTrades=100, testMaxNumberOfTrades=70,
         trainingSimilarityThreshold=1, testSimilarityThreshold=1,

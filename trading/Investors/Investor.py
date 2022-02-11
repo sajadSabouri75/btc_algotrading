@@ -27,8 +27,18 @@ class Investor:
         self._similarityToPreviousTree = 0
         self._mode = 'training'
 
+    def get_investment_per_trade(self):
+        return self._capital
+
+    def update_capital(self, benefit):
+        self._capital += benefit
+
+        if self._capital <= 0:
+            print('margin called!')
+            exit()
+
     def invest(self):
-        self._tradingHistory = self._trader.trade(self._investmentPerTrade)
+        self._tradingHistory = self._trader.trade()
         return 0
 
     def setSimilarityThreshold(self, newThreshold):

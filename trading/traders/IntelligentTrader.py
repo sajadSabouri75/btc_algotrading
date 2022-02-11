@@ -75,13 +75,14 @@ class IntelligentTrader:
 
         return True
 
-    def trade(self, investmentPerTrade):
+    def trade(self):
         totalBenefit = 0
         continueTrading = True
         self._timeIndex = self._startTimeIndex
         self._startTradeIndex = self._timeIndex
         self._buyWeakSignalAchievedCounts = 0
         self._sellWeakSignalAchievedCounts = 0
+        self._leverage = 5
 
         while continueTrading:
 
@@ -90,6 +91,7 @@ class IntelligentTrader:
                 self._buyWeakSignalAchievedCounts = 0
                 self._sellWeakSignalAchievedCounts = 0
 
+                investmentPerTrade = self._subject.get_investment_per_trade()
                 self._startTradeIndex = self._timeIndex
                 self._buyHistory[self._timeIndex] = 1
                 startTime = self._timeIndex
@@ -102,9 +104,10 @@ class IntelligentTrader:
                     timeIndex=self._timeIndex,
                     cryptoName='BTC-USD',
                     amount=investmentPerTrade / currentValue,
-                    leverage=1,
+                    leverage=self._leverage,
                     stopLossValue=stoplossValue)
 
+                self._subject.update_capital(benefit)
                 self._buyWeakSignalAchievedCounts = 0
                 self._sellWeakSignalAchievedCounts = 0
                 self._state = 'enter'
@@ -137,6 +140,7 @@ class IntelligentTrader:
                 self._buyWeakSignalAchievedCounts = 0
                 self._sellWeakSignalAchievedCounts = 0
 
+                investmentPerTrade = self._subject.get_investment_per_trade()
                 self._startTradeIndex = self._timeIndex
                 self._sellHistory[self._timeIndex] = 1
                 startTime = self._timeIndex
@@ -149,9 +153,10 @@ class IntelligentTrader:
                     timeIndex=self._timeIndex,
                     cryptoName='BTC-USD',
                     amount=investmentPerTrade / currentValue,
-                    leverage=1,
+                    leverage=self._leverage,
                     stopLossValue=stoplossValue)
 
+                self._subject.update_capital(benefit)
                 self._buyWeakSignalAchievedCounts = 0
                 self._sellWeakSignalAchievedCounts = 0
                 self._state = 'enter'
