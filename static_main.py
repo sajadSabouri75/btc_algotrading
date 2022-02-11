@@ -23,8 +23,8 @@ def main():
     target_series_columns = ['time', 'close', 'high', 'low', 'open', 'volume', 'amount', 'index']
     target_series_min_index = 0
     target_series_max_index = 50000
-    fractals = 5
-    fractals_secondary = 5
+    fractals = 6
+    fractals_secondary = 6
     datacenter_builder = data_builder.CSVDataCenterBuilder(
         fileName=inputs_relative_addresses,
         minDataBound=target_series_min_index,

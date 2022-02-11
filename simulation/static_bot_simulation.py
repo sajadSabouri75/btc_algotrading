@@ -39,9 +39,9 @@ class StaticBotSimulator:
 
         for current_index in range(self._n_candles):
             self._target_datacenter.getDatasource().loc[current_index, 'sell signals'] = \
-                self.check_sell_signal(current_index, series, main_indicators, secondary_indicators)
+                self.check_sell_signal_risky(current_index, series, main_indicators, secondary_indicators)
             self._target_datacenter.getDatasource().loc[current_index, 'buy signals'] = \
-                self.check_buy_signal(current_index, series, main_indicators, secondary_indicators)
+                self.check_buy_signal_risky(current_index, series, main_indicators, secondary_indicators)
 
         return self._target_datacenter.getDatasource()
 
@@ -59,6 +59,45 @@ class StaticBotSimulator:
                         values_for_divergence_check['high'].iloc[0]:
                     diff_high = values_for_divergence_check['high'].iloc[1] - values_for_divergence_check['high'].iloc[
                         0]
+                    # main divergences
+                    diffs_main = [
+                        values_for_divergence_check[target_indicator].iloc[1] -
+                        values_for_divergence_check[target_indicator].iloc[0]
+                        for target_indicator in main_indicators
+                    ]
+                    diffs = [diff_high * diff for diff in diffs_main]
+                    diffs_array = np.array(diffs)
+                    diffs_bool_array = diffs_array < 0
+                    diffs_bool_true_main = diffs_bool_array[diffs_bool_array]
+                    # secondary divergences
+                    diffs_secondary = [
+                        values_for_divergence_check[target_indicator].iloc[1] -
+                        values_for_divergence_check[target_indicator].iloc[0]
+                        for target_indicator in secondary_indicators
+                    ]
+                    diffs = [diff_high * diff for diff in diffs_secondary]
+                    diffs_array = np.array(diffs)
+                    diffs_bool_array = diffs_array < 0
+                    diffs_bool_true_secondary = diffs_bool_array[diffs_bool_array]
+
+                    if len(diffs_bool_true_main) >= self._n_true_divergences_main and len(
+                            diffs_bool_true_secondary) >= self._n_true_divergences_secondary:
+                        return True
+
+        return False
+
+    def check_sell_signal_risky(self, current_index, series, main_indicators, secondary_indicators):
+        accessible_high_fractals = self.get_last_accessible_fractals(
+            self._high_fractals_indices,
+            self._secondary_high_fractals_indices,
+            self._low_fractals_times,
+            current_index
+        )
+        if len(accessible_high_fractals) == 2:
+            if series['high'].iloc[current_index] < series['high'].iloc[accessible_high_fractals[1]]:
+                values_for_divergence_check = series.iloc[accessible_high_fractals]
+                if values_for_divergence_check['high'].iloc[1] > values_for_divergence_check['high'].iloc[0]:
+                    diff_high = values_for_divergence_check['high'].iloc[1] - values_for_divergence_check['high'].iloc[0]
                     # main divergences
                     diffs_main = [
                         values_for_divergence_check[target_indicator].iloc[1] -
@@ -125,16 +164,56 @@ class StaticBotSimulator:
                         return True
         return False
 
+    def check_buy_signal_risky(self, current_index, series, main_indicators, secondary_indicators):
+        accessible_low_fractals = self.get_last_accessible_fractals(
+            self._low_fractals_times,
+            self._secondary_low_fractals_times,
+            self._high_fractals_indices,
+            current_index
+        )
+        if len(accessible_low_fractals) == 2:
+            if series['low'].iloc[current_index] > series['low'].iloc[accessible_low_fractals[1]]:
+                values_for_divergence_check = series.iloc[accessible_low_fractals]
+                if values_for_divergence_check['low'].iloc[1] < values_for_divergence_check['low'].iloc[0]:
+                    diff_low = values_for_divergence_check['low'].iloc[1] - values_for_divergence_check['low'].iloc[0]
+                    # main divergences
+                    diffs_main = [
+                        values_for_divergence_check[target_indicator].iloc[1] -
+                        values_for_divergence_check[target_indicator].iloc[0]
+                        for target_indicator in main_indicators
+                    ]
+                    diffs = [diff_low * diff for diff in diffs_main]
+                    diffs_array = np.array(diffs)
+                    diffs_bool_array = diffs_array < 0
+                    diffs_bool_true_main = diffs_bool_array[diffs_bool_array]
+                    # secondary divergences
+                    diffs_secondary = [
+                        values_for_divergence_check[target_indicator].iloc[1] -
+                        values_for_divergence_check[target_indicator].iloc[0]
+                        for target_indicator in secondary_indicators
+                    ]
+                    diffs = [diff_low * diff for diff in diffs_secondary]
+                    diffs_array = np.array(diffs)
+                    diffs_bool_array = diffs_array < 0
+                    diffs_bool_true_secondary = diffs_bool_array[diffs_bool_array]
+
+                    if len(diffs_bool_true_main) >= self._n_true_divergences_main and len(
+                            diffs_bool_true_secondary) >= self._n_true_divergences_secondary:
+                        return True
+        return False
+
     def get_last_accessible_fractals(self, fractals, secondary_fractals, counterpart_fractals, current_index):
-        if self._fractal_period == self._secondary_fractal_period:
-            selected_fractals_indices = 3
-        else:
-            selected_fractals_indices = 2
+        # if self._fractal_period == self._secondary_fractal_period:
+        #     selected_fractals_indices = 3
+        # else:
+        selected_fractals_indices = 2
 
         selected_fractals = \
             fractals[
                 fractals < current_index - self._fractal_period
                 ][-selected_fractals_indices:]
+
+        return selected_fractals
 
         counterpart_selected_fractals = \
             counterpart_fractals[
